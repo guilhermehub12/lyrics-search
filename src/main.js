@@ -1,30 +1,28 @@
-import './css/style.css'
+import "./css/input.css";
+import "./css/style.css";
 
-function findLyrics(artist, song) {
-  return fetch(`https://api.lyrics.ovh/v1/${artist}/${song}`);
-}
+const form = document.querySelector("form");
+const lyricsDiv = document.querySelector("#lyrics");
+const lyricsTranslate = document.querySelector("#music");
+const API_KEY = "a3cf66532613b01d016dc0a16ab4996d";
 
-const form = document.querySelector('#lyrics_form');
-form.addEventListener('submit', el => {
-  el.preventDefault();
-  doSubmit();
-})
+form.addEventListener("submit", async (event) => {
+  event.preventDefault();
 
-async function doSubmit() {
-  const lyrics_el = document.querySelector('#lyrics');
-  const artist = document.querySelector('#artist');
-  const song = document.querySelector('#song');
+  const artist = document.querySelector("#artist").value;
+  const song = document.querySelector("#song").value;
+  const url = `https://api.vagalume.com.br/search.php?art=${artist}&mus=${song}&apikey=${API_KEY}`;
 
-  lyrics_el.innerHTML = `<div class="spinner-grow" role="status"><span class="sr-only">Carregando...</span></div>`;
-  try {
-    const lyricsResponse = await findLyrics(artist.value, song.value);
-    const data = await lyricsResponse.json();
-    if (data.lyrics)
-      lyrics_el.innerHTML = data.lyrics;
-    else
-      console.log(data.error)
-      lyrics_el.innerHTML = data.error;
-  } catch (err) {
-    console.log(err)
-  }
-}
+  await fetch(url)
+    .then((response) => response.json())
+    .then((data) => {
+      const lyrics = data.mus[0].text;
+      const lyricsTranslated = data.mus[0].translate[0].text;
+      lyricsDiv.innerHTML = lyrics;
+      lyricsTranslate.innerHTML = lyricsTranslated;
+    })
+    .catch((error) => {
+      lyricsDiv.innerHTML = "Erro ao buscar letra da música.";
+      console.error(error);
+    });
+});
